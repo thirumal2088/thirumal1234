@@ -1,13 +1,19 @@
-Rainbow Sports Attendance Demo
+Rainbow Sports Attendance — source backup
 
-GitHub Pages: place index.html at the root of a dedicated attendance repository.
-Enable Pages from the repository branch and root folder in Settings > Pages.
-Existing website: upload index.html to the attendance subfolder of your web root
-and open /attendance/ over HTTPS.
+Live admin:
+https://rainbow-sports-attendance-demo.thirumal2088.chatgpt.site/admin
+Staff attendance:
+https://rainbow-sports-attendance-demo.thirumal2088.chatgpt.site/
 
-Select sample staff, tap the sample selfie button, then record check-in or
-check-out. Open Admin with demo PIN 1234 to view the day's records.
-Times use India Standard Time. Records persist in the same browser and site URL.
-The sample selfie button does not use the camera. The demo PIN is public.
-Use sample data only. Shared records, secure administrator sign-in, camera
-capture, salary, advances and Excel reports are outside this demo.
+This ZIP contains the published source and its database schema migrations.
+Staff records, photos, advances, and voice notes are stored in the live
+database and are not included in this source backup.
+
+worker/index.js: application source
+drizzle/: database schema migrations
+dist/: built worker and deployment manifest
+
+The application requires a server-side Worker, a D1 database bound as DB,
+and the Sites sign-in integration for administrator identity. GitHub can
+store the source; GitHub Pages alone cannot run the app. The manifest
+identifies the existing Sites project.
