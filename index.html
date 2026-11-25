@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ta"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Rainbow Sports Attendance Demo</title><style>body{margin:0;padding:12px;background:#eef3f0}</style></head><body>
+<div class="demo-background">
+<section id="rs-phone-demo">
+<style>
+#rs-phone-demo {color-scheme:light dark; max-width:390px;margin:auto;background:light-dark(#eef3f0,#192920);color:light-dark(#172820,#f2faf5);border-radius:16px;overflow:hidden;font:16px system-ui,sans-serif}
+#rs-phone-demo header{background:#142e24;color:white;padding:22px 16px}
+#rs-phone-demo header p{color:#a6e0bd;margin:0 0 8px}
+#rs-phone-demo h2,#rs-phone-demo h3{margin:0 0 12px}
+#rs-phone-demo main{padding:14px}
+#rs-phone-demo article{background:light-dark(white,#20352a);border-radius:14px;padding:15px}
+#rs-phone-demo nav,#rs-phone-demo .actions,#rs-phone-demo .names{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+#rs-phone-demo button{min-height:44px;flex:1;border:0;border-radius:8px;background:light-dark(#e2eee7,#304f3d);color:light-dark(#17412d,#ecfff3);padding:8px;font:inherit}
+#rs-phone-demo button[aria-pressed=true],#rs-phone-demo .primary{background:#176444;color:white}
+#rs-phone-demo button:disabled{opacity:.5}
+#rs-phone-demo [hidden]{display:none}
+#rs-phone-demo label{display:grid;gap:5px;margin-bottom:10px}
+#rs-phone-demo input{min-height:44px;min-width:0;font:inherit;padding:0 10px;border:1px solid #80988a;border-radius:8px}
+</style>
+<header><p>RAINBOW SPORTS · DEMO</p><h2>ஸ்டாஃப் வருகைப் பதிவு</h2><p>சோதனைப் பதிவுகள் இந்த browser-ல் மட்டும் சேமிக்கப்படும்.</p></header>
+<main>
+<nav><button type="button" data-tab="staff" aria-pressed="true">ஸ்டாஃப் பதிவு</button><button type="button" data-tab="admin" aria-pressed="false">Admin</button></nav>
+<article data-panel="staff">
+<h3>வருகை / புறப்பாடு</h3>
+<div class="names"><button type="button" data-person="ஸ்டாஃப் A" aria-pressed="false">ஸ்டாஃப் A · 1</button><button type="button" data-person="ஸ்டாஃப் B" aria-pressed="false">ஸ்டாஃப் B · 2</button><button type="button" data-person="ஸ்டாஃப் C" aria-pressed="false">ஸ்டாஃப் C · 3</button></div>
+<p data-status role="status">உங்கள் பெயரைத் தொடவும்.</p>
+<div data-actions hidden>
+<div class="actions"><button type="button" data-selfie>மாதிரி செல்ஃபி</button></div>
+<div class="actions"><button type="button" class="primary" data-mark="வருகை" disabled>வருகை</button><button type="button" data-mark="புறப்பாடு" disabled>புறப்பாடு</button></div>
+</div>
+</article>
+<article data-panel="admin" hidden>
+<form id="demo-admin-login">
+<h3>Admin Login</h3>
+<label>Demo PIN · 1234<input type="password" inputmode="numeric" autocomplete="off" maxlength="4" required></label>
+<button class="primary">உள்ளே செல்ல</button>
+<p role="status" data-login-message></p>
+</form>
+<div data-admin-dashboard hidden>
+<h3>Admin Dashboard · Demo</h3>
+<ul data-demo-records></ul>
+<button type="button" data-admin-logout>வெளியேறு</button>
+</div>
+</article>
+</main>
+</section>
+</div>
+<script>
+{
+  const root = document.getElementById('rs-phone-demo');
+  const status = root.querySelector('[data-status]');
+  const names = root.querySelectorAll('[data-person]');
+  const marks = root.querySelectorAll('[data-mark]');
+  const actions = root.querySelector('[data-actions]');
+  const localDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' });
+  function storageKey() {
+    return 'rainbow-attendance-demo:' + localDate.format(new Date());
+  }
+  function readRecords(key) {
+    return JSON.parse(localStorage.getItem(key) || '{}');
+  }
+  const login = root.querySelector('#demo-admin-login');
+  const phone = login.querySelector('input');
+  const loginMessage = login.querySelector('[data-login-message]');
+  const dashboard = root.querySelector('[data-admin-dashboard]');
+  const records = root.querySelector('[data-demo-records]');
+  function renderRecords() {
+    records.replaceChildren();
+    let today;
+    try {
+      today = readRecords(storageKey());
+    } catch {
+      records.textContent = 'Browser சேமிப்பைத் திறக்க முடியவில்லை.';
+      return;
+    }
+    for (const name of names) {
+      const person = name.dataset.person;
+      const row = document.createElement('li');
+      const entry = today[person];
+      const format = new Intl.DateTimeFormat('en-IN', {
+        timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit'
+      });
+      const times = [];
+      if (entry?.arrival) times.push('வருகை ' + format.format(entry.arrival));
+      if (entry?.departure) times.push('புறப்பாடு ' + format.format(entry.departure));
+      const attendance = times.join(' · ') || 'பதிவு இல்லை';
+      row.textContent = person + ' · ' + attendance;
+      records.append(row);
+    }
+  }
+  login.onsubmit = event => {
+    event.preventDefault();
+    if (phone.value.replace(/\s/g, '') !== '1234') {
+      loginMessage.textContent = 'Demo PIN 1234 ஐ உள்ளிடவும்.';
+      return;
+    }
+    login.reset();
+    loginMessage.textContent = '';
+    renderRecords();
+    login.hidden = true;
+    dashboard.hidden = false;
+  };
+  root.querySelector('[data-admin-logout]').onclick = () => {
+    dashboard.hidden = true;
+    login.hidden = false;
+    phone.focus();
+  };
+  let person = '';
+  for (const tab of root.querySelectorAll('[data-tab]')) {
+    tab.onclick = () => {
+      for (const panel of root.querySelectorAll('[data-panel]')) panel.hidden = panel.dataset.panel !== tab.dataset.tab;
+      for (const item of root.querySelectorAll('[data-tab]')) item.setAttribute('aria-pressed', String(item === tab));
+    };
+  }
+  for (const name of names) {
+    name.onclick = () => {
+      person = name.dataset.person;
+      for (const item of names) item.setAttribute('aria-pressed', String(item === name));
+      status.textContent = person + ' · மாதிரி செல்ஃபியைத் தேர்வு செய்யவும்.';
+      actions.hidden = false;
+      for (const mark of marks) mark.disabled = true;
+    };
+  }
+  root.querySelector('[data-selfie]').onclick = () => {
+    status.textContent = person + ' · மாதிரி செல்ஃபி தயார்.';
+    for (const mark of marks) mark.disabled = false;
+  };
+  for (const mark of marks) {
+    mark.onclick = () => {
+      const arrival = mark.dataset.mark === 'வருகை';
+      const key = storageKey();
+      const field = arrival ? 'arrival' : 'departure';
+      try {
+        const today = readRecords(key);
+        const entry = today[person] || {};
+        if (!arrival && !entry.arrival) {
+          status.textContent = 'முதலில் வருகையைப் பதிவு செய்யவும்.';
+          return;
+        }
+        if (entry[field]) {
+          status.textContent = person + ' · ஏற்கனவே பதிவாகிவிட்டது.';
+          return;
+        }
+        entry[field] = Date.now();
+        today[person] = entry;
+        localStorage.setItem(key, JSON.stringify(today));
+      } catch {
+        status.textContent = 'Browser-ல் சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.';
+        return;
+      }
+      renderRecords();
+      status.textContent = person + ' · மாதிரி ' + mark.dataset.mark + ' பதிவானது.';
+      actions.hidden = true;
+      for (const name of names) name.setAttribute('aria-pressed', 'false');
+    };
+  }
+}
+</script>
+
+</body></html>
